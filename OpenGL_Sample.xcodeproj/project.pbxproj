@@ -37,6 +37,7 @@
 		AC4249A32902B90B00EAFA7B /* libglfw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libglfw3.a; path = OpenGL_Sample/Dependencies/GLFW/libglfw3.a; sourceTree = "<group>"; };
 		AC4249A52902BDC100EAFA7B /* Developer */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Developer; path = ../../../../System/Developer; sourceTree = "<group>"; };
 		AC4249A72902BEBF00EAFA7B /* libGLEW.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libGLEW.a; path = ../../../../usr/local/Cellar/glew/2.2.0_1/lib/libGLEW.a; sourceTree = "<group>"; };
+		AC4249AD290821AC00EAFA7B /* basic.shader */ = {isa = PBXFileReference; lastKnownFileType = text; path = basic.shader; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +76,7 @@
 		AC4249922902B71600EAFA7B /* OpenGL_Sample */ = {
 			isa = PBXGroup;
 			children = (
+				AC4249A9290820C000EAFA7B /* res */,
 				AC4249932902B71600EAFA7B /* main.cpp */,
 				AC4249A12902B87500EAFA7B /* Dependencies */,
 			);
@@ -100,6 +102,22 @@
 				AC4249A22902B8BB00EAFA7B /* GLFW */,
 			);
 			path = Dependencies;
+			sourceTree = "<group>";
+		};
+		AC4249A9290820C000EAFA7B /* res */ = {
+			isa = PBXGroup;
+			children = (
+				AC4249AA290820CE00EAFA7B /* shaders */,
+			);
+			path = res;
+			sourceTree = "<group>";
+		};
+		AC4249AA290820CE00EAFA7B /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				AC4249AD290821AC00EAFA7B /* basic.shader */,
+			);
+			path = shaders;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

@@ -11,6 +11,55 @@
 #include "glfw3.h"
 
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+
+struct ShaderProgramSouce
+{
+    std::string VertexSource;
+    std::string FragmentSource;
+};
+
+static ShaderProgramSouce ParseShader(const std::string& filepath)
+{
+    //Opens file
+    std::ifstream stream(filepath);
+    
+    enum class ShaderType
+    {
+        NONE = -1, VERTEX = 0, FRAGMENT = 1
+    };
+    
+    //Search line by line for shader type using our #shader syntax
+    std::string line;
+    //1 stringsream for vertex shader, 1 for fragment shader
+    std::stringstream ss[2];
+    ShaderType type = ShaderType::NONE;
+    while(getline(stream, line))
+    {
+        if(line.find("#shader") != std::string::npos)
+        {
+            //Find type of shader
+            if(line.find("vertex")!= std::string::npos)
+            {
+                type = ShaderType::VERTEX;
+            }
+            else if (line.find("fragment") != std::string::npos)
+            {
+                type = ShaderType::FRAGMENT;
+            }
+        }
+        else
+        {
+            //Line from file isn't a #shader line, need know which type to push to
+            //Using ararys in clever way to automate a little more
+            //Avoids if else if branch
+            ss[(int)type] << line << '\n';
+        }
+    }
+    return { ss[0].str(), ss[1].str() };
+}
 
 //Abstract out shader compilation. Have to do multiple times
 static unsigned int CompileShader(unsigned int type, const std::string& source)
@@ -123,33 +172,9 @@ int main(void)
     //Only need to call once since using one type of attribute
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
     
-    //void main will get called when this vertexShader gets called
-    //location should match first arg to glVertexAttribPointer (index of attribute)
-    //Using vec4 instead of vec2 (2nd arg of glVertexAttribPointer), because it'll be vec4 eventually
-    //glPosition is actually a vec4
-    std::string vertexShader =
-    "#version 330 core\n"
-    "\n"
-    "layout(location = 0) in vec4 position;\n"
-    "\n"
-    "void main()"
-    "{\n"
-    "   gl_Position = position;\n"
-    "}\n";
-
-    //Colors in graphics programming are traditionally floats between 0.0 and 1.0
-    //0 is white, 1 is black
-    std::string fragmentShader =
-    "#version 330 core\n"
-    "\n"
-    "layout(location = 0) out vec4 color;\n"
-    "\n"
-    "void main()"
-    "{\n"
-    "   color = vec4(1.0, 0.0, 0.0, 1.0);\n"
-    "}\n";
-    
-    unsigned int shader = CreateShader(vertexShader, fragmentShader);
+    //Xcode really isn't setup for relative paths
+    ShaderProgramSouce source = ParseShader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
+    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
     
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
