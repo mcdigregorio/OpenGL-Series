@@ -152,10 +152,20 @@ int main(void)
 
     //2 floats per position -> X and Y coordinate
     //Need to define for OpenGL
-    float positions[6] {
-        -0.5f, -0.5f,
-         0.0f,  0.5f,
-         0.5f, -0.5f
+    //Unique vertices needed
+    float positions[] {
+        -0.5f, -0.5f, //Index 0
+         0.5f, -0.5f, //Index 1
+         0.5f,  0.5f, //Index 2
+        -0.5f,  0.5f, //Index 3
+    };
+    
+    //Index buffer
+    //Renders square without redundant vertices
+    //Index into vertex buffer (see positions array)
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
     };
     
     //Need a vertex array object (VAO), to render anything in core context
@@ -166,11 +176,24 @@ int main(void)
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
+    //Each vertice has 2 floats, and we have 6 vertices
+    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
     
     glEnableVertexAttribArray(0);
     //Only need to call once since using one type of attribute
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+
+    //ibo - index buffer object
+    //Cherno using unsigned ints here because will use in future
+    //and no measureable performance difference for this example
+    //Could use unsigned char, unsigned short, etc. to save memory
+    //However, something like unsigned char would limit you to 256 indices
+    //Key here: TYPE HAS TO BE UNSIGNED
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    //Send index buffer to GPU
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
     
     //Xcode really isn't setup for relative paths
     ShaderProgramSouce source = ParseShader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
@@ -185,7 +208,11 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
         
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        //6 is number of indices, NOT vertices
+        //GL_UNSIGNED_INT is type of data in index buffer
+        //Can use nullptr since we bind ibo above
+        //Element buffer is synonymous with index buffer
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
