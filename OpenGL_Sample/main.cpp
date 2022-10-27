@@ -15,6 +15,37 @@
 #include <string>
 #include <sstream>
 
+//If false will call function to insert breakpoint at that moment in code
+//Intrinsic to compiler (will be different for each compiler)
+//For example, for MSVC you call __debugbreak() isntead of __builtin_trap()
+#define ASSERT(x) if(!(x)) __builtin_trap();
+
+//Use this macro to wrap OpenGL function calls
+//Avoids having to clear errors and check/log errors after every OpenGL function
+//A few flaws with this
+//  1. If we use a one line if statement this won't work, can fix by surrounding in scope (though not preferable)
+//      See macros video for more info
+#define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+static void GLClearError()
+{
+    //Could also write while(!glGetError());
+    while(glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const char* function, const char* file, int line)
+{
+    while(GLenum error = glGetError())
+    {
+        std::cout << "[OpenGL Error] (" << error << ")" << function << " " << file << ":" << line << std::endl;
+        //If return false, means gl call was not successful
+        return false;
+    }
+    return true;
+}
+
 struct ShaderProgramSouce
 {
     std::string VertexSource;
@@ -68,27 +99,27 @@ static unsigned int CompileShader(unsigned int type, const std::string& source)
     //source needs to exist at ths point
     //If string goes out of scope this char* will point to garbage
     const char* src = source.c_str();
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
+    GLCall(glShaderSource(id, 1, &src, nullptr));
+    GLCall(glCompileShader(id));
     
     //Can query result of glCompileShader
     //iv
     //i specifies we're specifying an integer
     //v specifies it wants a vector, in this case really a pointer
     int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+    GLCall(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
     if (result == GL_FALSE)
     {
         //Shader didn't compile successfully
         int length;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+        GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
         //Use alloca to keep message instantiation on stack
         //Lets you allocate on stack dynamically
         char* message = (char*)alloca(length * sizeof(char));
-        glGetShaderInfoLog(id, length, &length, message);
+        GLCall(glGetShaderInfoLog(id, length, &length, message));
         std::cout << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!" << std::endl;
         std::cout << message << std::endl;
-        glDeleteShader(id);
+        GLCall(glDeleteShader(id));
         return 0;
     }
     
@@ -106,15 +137,15 @@ static unsigned int CreateShader(const std::string&vertexShader, const std::stri
     //Attach both shaders to program
     //Think of this almost like compiling C++ code
     //Link to 1 program
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-    glValidateProgram(program);
+    GLCall(glAttachShader(program, vs));
+    GLCall(glAttachShader(program, fs));
+    GLCall(glLinkProgram(program));
+    GLCall(glValidateProgram(program));
     
     //Can delete shaders since now linked into program
     //Delete the intermediates (like .o objects in C++)
-    glDeleteShader(vs);
-    glDeleteShader(fs);
+    GLCall(glDeleteShader(vs));
+    GLCall(glDeleteShader(fs));
     
     return program;
 }
@@ -170,18 +201,18 @@ int main(void)
     
     //Need a vertex array object (VAO), to render anything in core context
     unsigned int vao = 0;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    GLCall(glGenVertexArrays(1, &vao));
+    GLCall(glBindVertexArray(vao));
     
     unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    GLCall(glGenBuffers(1, &buffer));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
     //Each vertice has 2 floats, and we have 6 vertices
-    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
     
-    glEnableVertexAttribArray(0);
+    GLCall(glEnableVertexAttribArray(0));
     //Only need to call once since using one type of attribute
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
 
     //ibo - index buffer object
     //Cherno using unsigned ints here because will use in future
@@ -190,15 +221,15 @@ int main(void)
     //However, something like unsigned char would limit you to 256 indices
     //Key here: TYPE HAS TO BE UNSIGNED
     unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    GLCall(glGenBuffers(1, &ibo));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
     //Send index buffer to GPU
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
     
     //Xcode really isn't setup for relative paths
     ShaderProgramSouce source = ParseShader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-    glUseProgram(shader);
+    GLCall(glUseProgram(shader));
     
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
     
@@ -206,23 +237,23 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        GLCall(glClear(GL_COLOR_BUFFER_BIT));
         
         //6 is number of indices, NOT vertices
         //GL_UNSIGNED_INT is type of data in index buffer
         //Can use nullptr since we bind ibo above
         //Element buffer is synonymous with index buffer
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        
         /* Swap front and back buffers */
-        glfwSwapBuffers(window);
+        GLCall(glfwSwapBuffers(window));
 
         /* Poll for and process events */
-        glfwPollEvents();
+        GLCall(glfwPollEvents());
     }
 
     glDeleteProgram(shader);
     
-    glfwTerminate();
+    GLCall(glfwTerminate());
     return 0;
 }
