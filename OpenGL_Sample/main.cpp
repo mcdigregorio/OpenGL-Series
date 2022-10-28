@@ -175,6 +175,9 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
     
+    //Synchronize this with our vsync (aka our monitor's refresh rate)
+    glfwSwapInterval(1);
+    
     if (glewInit() != GLEW_OK)
         std::cout << "Error initializing GLEW" << std::endl;
     
@@ -229,21 +232,45 @@ int main(void)
     //Xcode really isn't setup for relative paths
     ShaderProgramSouce source = ParseShader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
+    //Binding shader
     GLCall(glUseProgram(shader));
+    
+    //u_Color needs to match spelling and casing used in shader
+    //Retrieve location of u_Color variable
+    GLCall(int location = glGetUniformLocation(shader, "u_Color"));
+    //Might be okay, if uniform is unused, OpenGL will strip when compiling shader, and -1 will be return
+    ASSERT(location != -1);
+    //Set data in shader
+    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
     
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
     
+    //Red channel
+    float r = 0.0f;
+    float increment = 0.05f;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
         
+        
+        GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+        
         //6 is number of indices, NOT vertices
         //GL_UNSIGNED_INT is type of data in index buffer
         //Can use nullptr since we bind ibo above
         //Element buffer is synonymous with index buffer
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        
+        //Bounce r channel value between 0 and 1
+        if (r > 1.0f)
+            increment = -0.05f;
+        else if (r < 0.0f)
+            increment =  0.05f;
+        
+        r += increment;
         
         /* Swap front and back buffers */
         GLCall(glfwSwapBuffers(window));
