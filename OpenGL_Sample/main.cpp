@@ -203,7 +203,7 @@ int main(void)
     };
     
     //Need a vertex array object (VAO), to render anything in core context
-    unsigned int vao = 0;
+    unsigned int vao;
     GLCall(glGenVertexArrays(1, &vao));
     GLCall(glBindVertexArray(vao));
     
@@ -211,10 +211,13 @@ int main(void)
     GLCall(glGenBuffers(1, &buffer));
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
     //Each vertice has 2 floats, and we have 6 vertices
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
     
     GLCall(glEnableVertexAttribArray(0));
     //Only need to call once since using one type of attribute
+    //Specify the layout of the vertex buffer data
+    //This is where "buffer" gets linked to vao
+    //Index at first arg is being bound to currently bound GL_ARRAY_BUFFER
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
 
     //ibo - index buffer object
@@ -243,7 +246,11 @@ int main(void)
     //Set data in shader
     GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
     
-    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //Clear everything
+    GLCall(glBindVertexArray(0));
+    GLCall(glUseProgram(0));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
     
     //Red channel
     float r = 0.0f;
@@ -255,8 +262,11 @@ int main(void)
         /* Render here */
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
         
-        
+        GLCall(glUseProgram(shader));
         GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+    
+        GLCall(glBindVertexArray(vao));
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
         
         //6 is number of indices, NOT vertices
         //GL_UNSIGNED_INT is type of data in index buffer
