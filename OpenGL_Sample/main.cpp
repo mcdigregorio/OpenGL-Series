@@ -10,41 +10,14 @@
 #include "GL/glew.h"
 #include "glfw3.h"
 
+#include "Renderer.h"
+#include "VertexBuffer.hpp"
+#include "IndexBuffer.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
-
-//If false will call function to insert breakpoint at that moment in code
-//Intrinsic to compiler (will be different for each compiler)
-//For example, for MSVC you call __debugbreak() isntead of __builtin_trap()
-#define ASSERT(x) if(!(x)) __builtin_trap();
-
-//Use this macro to wrap OpenGL function calls
-//Avoids having to clear errors and check/log errors after every OpenGL function
-//A few flaws with this
-//  1. If we use a one line if statement this won't work, can fix by surrounding in scope (though not preferable)
-//      See macros video for more info
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-
-static void GLClearError()
-{
-    //Could also write while(!glGetError());
-    while(glGetError() != GL_NO_ERROR);
-}
-
-static bool GLLogCall(const char* function, const char* file, int line)
-{
-    while(GLenum error = glGetError())
-    {
-        std::cout << "[OpenGL Error] (" << error << ")" << function << " " << file << ":" << line << std::endl;
-        //If return false, means gl call was not successful
-        return false;
-    }
-    return true;
-}
 
 struct ShaderProgramSouce
 {
@@ -207,11 +180,9 @@ int main(void)
     GLCall(glGenVertexArrays(1, &vao));
     GLCall(glBindVertexArray(vao));
     
-    unsigned int buffer;
-    GLCall(glGenBuffers(1, &buffer));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-    //Each vertice has 2 floats, and we have 6 vertices
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
+    //If we have multiple we'll have to rebind the ones we want to use
+    //This will be handled by Vertex Array anyways though
+    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
     
     GLCall(glEnableVertexAttribArray(0));
     //Only need to call once since using one type of attribute
@@ -226,11 +197,8 @@ int main(void)
     //Could use unsigned char, unsigned short, etc. to save memory
     //However, something like unsigned char would limit you to 256 indices
     //Key here: TYPE HAS TO BE UNSIGNED
-    unsigned int ibo;
-    GLCall(glGenBuffers(1, &ibo));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    //Send index buffer to GPU
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
+    
+    IndexBuffer ib(indices, 6);
     
     //Xcode really isn't setup for relative paths
     ShaderProgramSouce source = ParseShader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
@@ -266,12 +234,13 @@ int main(void)
         GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
     
         GLCall(glBindVertexArray(vao));
-        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+        ib.Bind();
         
         //6 is number of indices, NOT vertices
         //GL_UNSIGNED_INT is type of data in index buffer
         //Can use nullptr since we bind ibo above
         //Element buffer is synonymous with index buffer
+        //Could theoretically put into IndexBuffer class, but for our implementation, we'll leave that up to the Renderer
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
         
         //Bounce r channel value between 0 and 1
