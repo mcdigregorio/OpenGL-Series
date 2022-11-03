@@ -13,6 +13,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
+#include "VertexArray.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -175,21 +176,13 @@ int main(void)
         2, 3, 0
     };
     
-    //Need a vertex array object (VAO), to render anything in core context
-    unsigned int vao;
-    GLCall(glGenVertexArrays(1, &vao));
-    GLCall(glBindVertexArray(vao));
-    
+    VertexArray va;
     //If we have multiple we'll have to rebind the ones we want to use
     //This will be handled by Vertex Array anyways though
     VertexBuffer vb(positions, 4 * 2 * sizeof(float));
-    
-    GLCall(glEnableVertexAttribArray(0));
-    //Only need to call once since using one type of attribute
-    //Specify the layout of the vertex buffer data
-    //This is where "buffer" gets linked to vao
-    //Index at first arg is being bound to currently bound GL_ARRAY_BUFFER
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0));
+    VertexBufferLayout layout;
+    layout.Push<float>(2);
+    va.AddBuffer(vb, layout);
 
     //ibo - index buffer object
     //Cherno using unsigned ints here because will use in future
@@ -215,7 +208,7 @@ int main(void)
     GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
     
     //Clear everything
-    GLCall(glBindVertexArray(0));
+    va.Unbind();
     GLCall(glUseProgram(0));
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
@@ -233,7 +226,7 @@ int main(void)
         GLCall(glUseProgram(shader));
         GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
     
-        GLCall(glBindVertexArray(vao));
+        va.Bind();
         ib.Bind();
         
         //6 is number of indices, NOT vertices
