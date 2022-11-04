@@ -10,119 +10,16 @@
 #include "GL/glew.h"
 #include "glfw3.h"
 
-#include "Renderer.h"
-#include "VertexBuffer.hpp"
-#include "IndexBuffer.hpp"
-#include "VertexArray.hpp"
-
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 
-struct ShaderProgramSouce
-{
-    std::string VertexSource;
-    std::string FragmentSource;
-};
-
-static ShaderProgramSouce ParseShader(const std::string& filepath)
-{
-    //Opens file
-    std::ifstream stream(filepath);
-    
-    enum class ShaderType
-    {
-        NONE = -1, VERTEX = 0, FRAGMENT = 1
-    };
-    
-    //Search line by line for shader type using our #shader syntax
-    std::string line;
-    //1 stringsream for vertex shader, 1 for fragment shader
-    std::stringstream ss[2];
-    ShaderType type = ShaderType::NONE;
-    while(getline(stream, line))
-    {
-        if(line.find("#shader") != std::string::npos)
-        {
-            //Find type of shader
-            if(line.find("vertex")!= std::string::npos)
-            {
-                type = ShaderType::VERTEX;
-            }
-            else if (line.find("fragment") != std::string::npos)
-            {
-                type = ShaderType::FRAGMENT;
-            }
-        }
-        else
-        {
-            //Line from file isn't a #shader line, need know which type to push to
-            //Using ararys in clever way to automate a little more
-            //Avoids if else if branch
-            ss[(int)type] << line << '\n';
-        }
-    }
-    return { ss[0].str(), ss[1].str() };
-}
-
-//Abstract out shader compilation. Have to do multiple times
-static unsigned int CompileShader(unsigned int type, const std::string& source)
-{
-    unsigned int id  = glCreateShader(type);
-    //source needs to exist at ths point
-    //If string goes out of scope this char* will point to garbage
-    const char* src = source.c_str();
-    GLCall(glShaderSource(id, 1, &src, nullptr));
-    GLCall(glCompileShader(id));
-    
-    //Can query result of glCompileShader
-    //iv
-    //i specifies we're specifying an integer
-    //v specifies it wants a vector, in this case really a pointer
-    int result;
-    GLCall(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
-    if (result == GL_FALSE)
-    {
-        //Shader didn't compile successfully
-        int length;
-        GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
-        //Use alloca to keep message instantiation on stack
-        //Lets you allocate on stack dynamically
-        char* message = (char*)alloca(length * sizeof(char));
-        GLCall(glGetShaderInfoLog(id, length, &length, message));
-        std::cout << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!" << std::endl;
-        std::cout << message << std::endl;
-        GLCall(glDeleteShader(id));
-        return 0;
-    }
-    
-    return id;
-}
-
-//Both inputs are respective shader source code
-//Returns int for unique identifier
-static unsigned int CreateShader(const std::string&vertexShader, const std::string& fragmentShader)
-{
-    unsigned int program = glCreateProgram();
-    unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-    unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
-    
-    //Attach both shaders to program
-    //Think of this almost like compiling C++ code
-    //Link to 1 program
-    GLCall(glAttachShader(program, vs));
-    GLCall(glAttachShader(program, fs));
-    GLCall(glLinkProgram(program));
-    GLCall(glValidateProgram(program));
-    
-    //Can delete shaders since now linked into program
-    //Delete the intermediates (like .o objects in C++)
-    GLCall(glDeleteShader(vs));
-    GLCall(glDeleteShader(fs));
-    
-    return program;
-}
+#include "Renderer.h"
+#include "VertexBuffer.hpp"
+#include "IndexBuffer.hpp"
+#include "VertexArray.hpp"
+#include "Shader.hpp"
 
 int main(void)
 {
@@ -190,28 +87,18 @@ int main(void)
     //Could use unsigned char, unsigned short, etc. to save memory
     //However, something like unsigned char would limit you to 256 indices
     //Key here: TYPE HAS TO BE UNSIGNED
-    
     IndexBuffer ib(indices, 6);
     
     //Xcode really isn't setup for relative paths
-    ShaderProgramSouce source = ParseShader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
-    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-    //Binding shader
-    GLCall(glUseProgram(shader));
-    
-    //u_Color needs to match spelling and casing used in shader
-    //Retrieve location of u_Color variable
-    GLCall(int location = glGetUniformLocation(shader, "u_Color"));
-    //Might be okay, if uniform is unused, OpenGL will strip when compiling shader, and -1 will be return
-    ASSERT(location != -1);
-    //Set data in shader
-    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
+    Shader shader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
+    shader.Bind();
+    shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
     
     //Clear everything
     va.Unbind();
-    GLCall(glUseProgram(0));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+    vb.Unbind();
+    ib.Unbind();
+    shader.Unbind();
     
     //Red channel
     float r = 0.0f;
@@ -223,8 +110,8 @@ int main(void)
         /* Render here */
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
         
-        GLCall(glUseProgram(shader));
-        GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+        shader.Bind();
+        shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
     
         va.Bind();
         ib.Bind();
@@ -250,8 +137,6 @@ int main(void)
         /* Poll for and process events */
         GLCall(glfwPollEvents());
     }
-
-    glDeleteProgram(shader);
     
     GLCall(glfwTerminate());
     return 0;

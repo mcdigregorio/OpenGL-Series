@@ -17,6 +17,7 @@
 		AC9FE8E4291287CD001A6DA7 /* Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC9FE8E3291287CD001A6DA7 /* Renderer.cpp */; };
 		AC9FE8E729128946001A6DA7 /* VertexBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC9FE8E529128946001A6DA7 /* VertexBuffer.cpp */; };
 		AC9FE8EA29128C5E001A6DA7 /* IndexBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC9FE8E929128C5E001A6DA7 /* IndexBuffer.cpp */; };
+		ACE37F6D2915253D006B1DBC /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACE37F6B2915253D006B1DBC /* Shader.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -51,6 +52,8 @@
 		AC9FE8E629128946001A6DA7 /* VertexBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VertexBuffer.hpp; sourceTree = "<group>"; };
 		AC9FE8E829128C5E001A6DA7 /* IndexBuffer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = IndexBuffer.hpp; sourceTree = "<group>"; };
 		AC9FE8E929128C5E001A6DA7 /* IndexBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IndexBuffer.cpp; sourceTree = "<group>"; };
+		ACE37F6B2915253D006B1DBC /* Shader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Shader.cpp; sourceTree = "<group>"; };
+		ACE37F6C2915253D006B1DBC /* Shader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Shader.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +104,8 @@
 				AC69349F2913D80300B07779 /* VertexArray.cpp */,
 				AC6934A02913D80300B07779 /* VertexArray.hpp */,
 				AC6934A32913D91E00B07779 /* VertexBufferLayout.hpp */,
+				ACE37F6B2915253D006B1DBC /* Shader.cpp */,
+				ACE37F6C2915253D006B1DBC /* Shader.hpp */,
 			);
 			path = OpenGL_Sample;
 			sourceTree = "<group>";
@@ -203,6 +208,7 @@
 				AC4249942902B71600EAFA7B /* main.cpp in Sources */,
 				AC9FE8EA29128C5E001A6DA7 /* IndexBuffer.cpp in Sources */,
 				AC6934A12913D80300B07779 /* VertexArray.cpp in Sources */,
+				ACE37F6D2915253D006B1DBC /* Shader.cpp in Sources */,
 				AC9FE8E729128946001A6DA7 /* VertexBuffer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
