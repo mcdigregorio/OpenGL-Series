@@ -17,6 +17,7 @@
 
 #include "Renderer.h"
 #include "VertexBuffer.hpp"
+#include "VertexBufferLayout.hpp"
 #include "IndexBuffer.hpp"
 #include "VertexArray.hpp"
 #include "Shader.hpp"
@@ -100,6 +101,8 @@ int main(void)
     ib.Unbind();
     shader.Unbind();
     
+    Renderer renderer;
+    
     //Red channel
     float r = 0.0f;
     float increment = 0.05f;
@@ -107,21 +110,13 @@ int main(void)
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
-        GLCall(glClear(GL_COLOR_BUFFER_BIT));
+        //Render here
+        renderer.Clear();
         
         shader.Bind();
         shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
     
-        va.Bind();
-        ib.Bind();
-        
-        //6 is number of indices, NOT vertices
-        //GL_UNSIGNED_INT is type of data in index buffer
-        //Can use nullptr since we bind ibo above
-        //Element buffer is synonymous with index buffer
-        //Could theoretically put into IndexBuffer class, but for our implementation, we'll leave that up to the Renderer
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        renderer.Draw(va, ib, shader);
         
         //Bounce r channel value between 0 and 1
         if (r > 1.0f)

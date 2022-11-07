@@ -6,7 +6,10 @@
 //
 
 #include "VertexBuffer.hpp"
-#include "VertexBufferLayout.hpp"
+
+//Changing to forward declaration
+//After changes to Renderer files, circular dependency was created when including VertexBufferLayout.hpp
+class VertexBufferLayout;
 
 #ifndef VertexArray_hpp
 #define VertexArray_hpp
