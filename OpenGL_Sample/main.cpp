@@ -21,6 +21,7 @@
 #include "IndexBuffer.hpp"
 #include "VertexArray.hpp"
 #include "Shader.hpp"
+#include "Texture.hpp"
 
 int main(void)
 {
@@ -60,10 +61,10 @@ int main(void)
     //Need to define for OpenGL
     //Unique vertices needed
     float positions[] {
-        -0.5f, -0.5f, //Index 0
-         0.5f, -0.5f, //Index 1
-         0.5f,  0.5f, //Index 2
-        -0.5f,  0.5f, //Index 3
+        -0.5f, -0.5f, 0.0f, 0.0f, //Index 0
+         0.5f, -0.5f, 1.0f, 0.0f, //Index 1
+         0.5f,  0.5f, 1.0f, 1.0f, //Index 2
+        -0.5f,  0.5f, 0.0f, 1.0f  //Index 3
     };
     
     //Index buffer
@@ -74,11 +75,17 @@ int main(void)
         2, 3, 0
     };
     
+    //How OpenGL is going to blend alpha pixels
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    GLCall(glEnable(GL_BLEND));
+    
     VertexArray va;
     //If we have multiple we'll have to rebind the ones we want to use
     //This will be handled by Vertex Array anyways though
-    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+    VertexBuffer vb(positions, 4 * 4 * sizeof(float));
     VertexBufferLayout layout;
+    layout.Push<float>(2);
+    //Add another 2 floats for texture coordinates
     layout.Push<float>(2);
     va.AddBuffer(vb, layout);
 
@@ -94,6 +101,12 @@ int main(void)
     Shader shader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
     shader.Bind();
     shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+    
+    Texture texture("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/textures/bananas.png");
+    texture.Bind();
+    //0 needs to match Bind arg above
+    //If called Bind(2), 2nd arg below would be 2
+    shader.SetUniform1i("u_Texture", 0);
     
     //Clear everything
     va.Unbind();

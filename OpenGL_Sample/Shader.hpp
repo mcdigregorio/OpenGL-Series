@@ -36,8 +36,11 @@ public:
     void Unbind() const;
     
     //Set uniforms
+    void SetUniform1i(const std::string& name, int value);
+    void SetUniform1f(const std::string& name, float value);
     //If using a maths library would just use some kind of vec4 here
     void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
+    
     
 private:
     ShaderProgramSouce ParseShader(const std::string& filepath);
