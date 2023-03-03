@@ -23,6 +23,9 @@
 #include "Shader.hpp"
 #include "Texture.hpp"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 int main(void)
 {
     GLFWwindow* window;
@@ -97,10 +100,30 @@ int main(void)
     //Key here: TYPE HAS TO BE UNSIGNED
     IndexBuffer ib(indices, 6);
     
+    //Create projection matrix 4x4
+    //If you multiply by 2 you'll get 4:3
+    //Really created something with distance of 3 units from top to bottom
+    //and 4 units from left to right
+    //Basically specifies boundaries of our windows
+    //-2.0f is left edge
+    // 2.0f is right edge
+    //-1.5f is bottom edge
+    // 1.5f is top edge
+    //Last 2 args are near and far plane (If we try to render anthing
+    //outside it will get culled)
+    glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+    
+    //Still keeping 4:3 aspect ratio with below matrix
+    //Makes projection matrix bigger which makes image smaller
+    //glm::mat4 proj = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, -1.0f, 1.0f);
+    
     //Xcode really isn't setup for relative paths
     Shader shader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
     shader.Bind();
     shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+    //Need to set MVP uniform
+    //Setting once is enough, but can set every frame if we want to
+    shader.SetUniformMat4f("u_MVP", proj);
     
     Texture texture("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/textures/bananas.png");
     texture.Bind();

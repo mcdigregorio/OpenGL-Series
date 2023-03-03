@@ -11,6 +11,8 @@
 #include <string>
 #include <unordered_map>
 
+#include "glm/glm.hpp"
+
 struct ShaderProgramSouce
 {
     std::string VertexSource;
@@ -40,7 +42,7 @@ public:
     void SetUniform1f(const std::string& name, float value);
     //If using a maths library would just use some kind of vec4 here
     void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
-    
+    void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
     
 private:
     ShaderProgramSouce ParseShader(const std::string& filepath);
