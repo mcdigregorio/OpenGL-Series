@@ -122,8 +122,13 @@ int main(void)
     //glm::mat4 proj = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, -1.0f, 1.0f);
     
     glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
-    glm::vec4 vp(100.0f, 100.0f, 0.0f, 1.0f);
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));
     
+    //Model, view, projection matrix
+    glm::mat4 mvp = proj * view * model;
+    
+    glm::vec4 vp(100.0f, 100.0f, 0.0f, 1.0f);
     //For instructional purposes can add break point and see shader math here on CPU to see what we get
     //Take our coordinate and convert it to a space between -1 and 1
     glm::vec4 result = proj*vp;
@@ -134,7 +139,7 @@ int main(void)
     shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
     //Need to set MVP uniform
     //Setting once is enough, but can set every frame if we want to
-    shader.SetUniformMat4f("u_MVP", proj);
+    shader.SetUniformMat4f("u_MVP", mvp);
     
     Texture texture("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/textures/bananas.png");
     texture.Bind();
