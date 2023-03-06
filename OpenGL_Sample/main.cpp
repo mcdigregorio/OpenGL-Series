@@ -41,7 +41,7 @@ int main(void)
     glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(960, 540, "Hello There", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -64,10 +64,10 @@ int main(void)
     //Need to define for OpenGL
     //Unique vertices needed
     float positions[] {
-        -0.5f, -0.5f, 0.0f, 0.0f, //Index 0
-         0.5f, -0.5f, 1.0f, 0.0f, //Index 1
-         0.5f,  0.5f, 1.0f, 1.0f, //Index 2
-        -0.5f,  0.5f, 0.0f, 1.0f  //Index 3
+         100.0f, 100.0f, 0.0f, 0.0f, //Index 0
+         200.0f, 100.0f, 1.0f, 0.0f, //Index 1
+         200.0f, 200.0f, 1.0f, 1.0f, //Index 2
+         100.0f, 200.0f, 0.0f, 1.0f  //Index 3
     };
     
     //Index buffer
@@ -111,11 +111,22 @@ int main(void)
     // 1.5f is top edge
     //Last 2 args are near and far plane (If we try to render anthing
     //outside it will get culled)
-    glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+    
+    //If any vertex positions exceed these bounds they will not get rendered
+    //This is the view, this is all that you see
+    //Because we chose -2.0f and 2.0f, 0.0f is in fact the center for this case
+    //glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
     
     //Still keeping 4:3 aspect ratio with below matrix
     //Makes projection matrix bigger which makes image smaller
     //glm::mat4 proj = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, -1.0f, 1.0f);
+    
+    glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+    glm::vec4 vp(100.0f, 100.0f, 0.0f, 1.0f);
+    
+    //For instructional purposes can add break point and see shader math here on CPU to see what we get
+    //Take our coordinate and convert it to a space between -1 and 1
+    glm::vec4 result = proj*vp;
     
     //Xcode really isn't setup for relative paths
     Shader shader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
