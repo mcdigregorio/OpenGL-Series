@@ -30,6 +30,8 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include "tests/TestClearColor.hpp"
+
 int main(void)
 {
     GLFWwindow* window;
@@ -63,97 +65,10 @@ int main(void)
     
     //Need to call after context created
     std::cout << glGetString(GL_VERSION) << std::endl;
-
-    //2 floats per position -> X and Y coordinate
-    //Need to define for OpenGL
-    //Unique vertices needed
-    //Last two columns are texture coordinates
-    //Centered around 0,0. Translations occur about this point.
-    //100x100 px square
-    //0,0 is bottom left of screen
-    float positions[] {
-        -50.0f, -50.0f, 0.0f, 0.0f, //Index 0
-         50.0f, -50.0f, 1.0f, 0.0f, //Index 1
-         50.0f,  50.0f, 1.0f, 1.0f, //Index 2
-        -50.0f,  50.0f, 0.0f, 1.0f  //Index 3
-    };
-    
-    //Index buffer
-    //Renders square without redundant vertices
-    //Index into vertex buffer (see positions array)
-    unsigned int indices[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
     
     //How OpenGL is going to blend alpha pixels
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     GLCall(glEnable(GL_BLEND));
-    
-    VertexArray va;
-    //If we have multiple we'll have to rebind the ones we want to use
-    //This will be handled by Vertex Array anyways though
-    VertexBuffer vb(positions, 4 * 4 * sizeof(float));
-    VertexBufferLayout layout;
-    layout.Push<float>(2);
-    //Add another 2 floats for texture coordinates
-    layout.Push<float>(2);
-    va.AddBuffer(vb, layout);
-
-    //ibo - index buffer object
-    //Cherno using unsigned ints here because will use in future
-    //and no measureable performance difference for this example
-    //Could use unsigned char, unsigned short, etc. to save memory
-    //However, something like unsigned char would limit you to 256 indices
-    //Key here: TYPE HAS TO BE UNSIGNED
-    IndexBuffer ib(indices, 6);
-    
-    //Create projection matrix 4x4
-    //If you multiply by 2 you'll get 4:3
-    //Really created something with distance of 3 units from top to bottom
-    //and 4 units from left to right
-    //Basically specifies boundaries of our windows
-    //-2.0f is left edge
-    // 2.0f is right edge
-    //-1.5f is bottom edge
-    // 1.5f is top edge
-    //Last 2 args are near and far plane (If we try to render anthing
-    //outside it will get culled)
-    
-    //If any vertex positions exceed these bounds they will not get rendered
-    //This is the view, this is all that you see
-    //Because we chose -2.0f and 2.0f, 0.0f is in fact the center for this case
-    //glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
-    
-    //Still keeping 4:3 aspect ratio with below matrix
-    //Makes projection matrix bigger which makes image smaller
-    //glm::mat4 proj = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, -1.0f, 1.0f);
-    
-    glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
-    //With coordinates of 0,0,0 view matrix isn't applying any transformation. Redundant.
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-    
-    glm::vec4 vp(100.0f, 100.0f, 0.0f, 1.0f);
-    //For instructional purposes can add break point and see shader math here on CPU to see what we get
-    //Take our coordinate and convert it to a space between -1 and 1
-    glm::vec4 result = proj*vp;
-    
-    //Xcode really isn't setup for relative paths
-    Shader shader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
-    shader.Bind();
-    shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
-    
-    Texture texture("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/textures/bananas.png");
-    texture.Bind();
-    //0 needs to match Bind arg above
-    //If called Bind(2), 2nd arg below would be 2
-    shader.SetUniform1i("u_Texture", 0);
-    
-    //Clear everything
-    va.Unbind();
-    vb.Unbind();
-    ib.Unbind();
-    shader.Unbind();
     
     Renderer renderer;
     
@@ -162,18 +77,17 @@ int main(void)
     ImGui_ImplOpenGL3_Init();
     ImGui::StyleColorsDark();
     
-    glm::vec3 translationA(200, 200, 0);
-    glm::vec3 translationB(400, 200, 0);
-    
-    //Red channel
-    float r = 0.0f;
-    float increment = 0.05f;
+    test::TestClearColor test;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         //Render here
         renderer.Clear();
+        
+        //0.0 for now since now setup
+        test.OnUpdate(0.0f);
+        test.OnRender();
         
         //Nothing to do with GLFW new frame
         //Can put pretty much anywhere, just as long as it's
@@ -182,45 +96,7 @@ int main(void)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
-        {
-            //Recalculating model matrix and mvp every frame
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
-            //Model, view, projection matrix
-            glm::mat4 mvp = proj * view * model;
-            //Need to bind to set uniforms
-            //Only need to do once since Draw binds shader and doesn't unbind
-            shader.Bind();
-            //Need to set MVP uniform
-            //Setting once is enough, but can set every frame if we want to
-            shader.SetUniformMat4f("u_MVP", mvp);
-            //Draw will bind shader and never unbind
-            renderer.Draw(va, ib, shader);
-        }
-        
-        {
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB);
-            glm::mat4 mvp = proj * view * model;
-            shader.SetUniformMat4f("u_MVP", mvp);
-            renderer.Draw(va, ib, shader);
-        }
-        
-        //Bounce r channel value between 0 and 1
-        if (r > 1.0f)
-            increment = -0.05f;
-        else if (r < 0.0f)
-            increment =  0.05f;
-        
-        r += increment;
-        
-        //ImGui window
-        {
-            //Single passing the memory address of translation, y and z will get passed along since memory layout is the same
-            //Float3 arg 2 is float array
-            //In theory could get float array out of GLM, but for now just passing memory address
-            ImGui::SliderFloat3("TranslationA", &translationA.x, 0.0f, 960.0f);
-            ImGui::SliderFloat3("TranslationB", &translationB.x, 0.0f, 960.0f);
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        }
+        test.OnImGuiRender();
         
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

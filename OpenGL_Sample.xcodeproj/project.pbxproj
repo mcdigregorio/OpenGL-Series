@@ -20,6 +20,7 @@
 		AC5938A129B7CC0100F8F76B /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC59389729B7CC0000F8F76B /* imgui.cpp */; };
 		AC5938A229B7CC0100F8F76B /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC59389B29B7CC0100F8F76B /* imgui_widgets.cpp */; };
 		AC5938A329B7CC0100F8F76B /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC59389C29B7CC0100F8F76B /* imgui_draw.cpp */; };
+		AC5938AB29B9287800F8F76B /* TestClearColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC5938A929B9287800F8F76B /* TestClearColor.cpp */; };
 		AC6934A12913D80300B07779 /* VertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC69349F2913D80300B07779 /* VertexArray.cpp */; };
 		AC82A680291BCBF30042BF7C /* stb_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC82A67F291BCBF30042BF7C /* stb_image.cpp */; };
 		AC82A683291BF04E0042BF7C /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC82A681291BF04E0042BF7C /* Texture.cpp */; };
@@ -69,6 +70,9 @@
 		AC59389B29B7CC0100F8F76B /* imgui_widgets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_widgets.cpp; sourceTree = "<group>"; };
 		AC59389C29B7CC0100F8F76B /* imgui_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_draw.cpp; sourceTree = "<group>"; };
 		AC5938A429B7CD0500F8F76B /* imgui_impl_opengl3_loader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui_impl_opengl3_loader.h; sourceTree = "<group>"; };
+		AC5938A729B9265B00F8F76B /* Test.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Test.hpp; sourceTree = "<group>"; };
+		AC5938A929B9287800F8F76B /* TestClearColor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TestClearColor.cpp; sourceTree = "<group>"; };
+		AC5938AA29B9287800F8F76B /* TestClearColor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TestClearColor.hpp; sourceTree = "<group>"; };
 		AC5A69FC29B2178A00D42773 /* glm */ = {isa = PBXFileReference; lastKnownFileType = folder; path = glm; sourceTree = "<group>"; };
 		AC69349F2913D80300B07779 /* VertexArray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VertexArray.cpp; sourceTree = "<group>"; };
 		AC6934A02913D80300B07779 /* VertexArray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VertexArray.hpp; sourceTree = "<group>"; };
@@ -124,6 +128,7 @@
 		AC4249922902B71600EAFA7B /* OpenGL_Sample */ = {
 			isa = PBXGroup;
 			children = (
+				AC5938A529B9263E00F8F76B /* tests */,
 				AC82A67B291BCB2B0042BF7C /* vendor */,
 				AC9FE8E929128C5E001A6DA7 /* IndexBuffer.cpp */,
 				AC9FE8E829128C5E001A6DA7 /* IndexBuffer.hpp */,
@@ -205,6 +210,16 @@
 				AC59388F29B7CC0000F8F76B /* imstb_truetype.h */,
 			);
 			path = imgui;
+			sourceTree = "<group>";
+		};
+		AC5938A529B9263E00F8F76B /* tests */ = {
+			isa = PBXGroup;
+			children = (
+				AC5938A729B9265B00F8F76B /* Test.hpp */,
+				AC5938A929B9287800F8F76B /* TestClearColor.cpp */,
+				AC5938AA29B9287800F8F76B /* TestClearColor.hpp */,
+			);
+			path = tests;
 			sourceTree = "<group>";
 		};
 		AC82A679291AA3DF0042BF7C /* textures */ = {
@@ -300,6 +315,7 @@
 				AC82A680291BCBF30042BF7C /* stb_image.cpp in Sources */,
 				AC59389E29B7CC0100F8F76B /* imgui_tables.cpp in Sources */,
 				AC59389F29B7CC0100F8F76B /* imgui_impl_opengl3.cpp in Sources */,
+				AC5938AB29B9287800F8F76B /* TestClearColor.cpp in Sources */,
 				AC9FE8EA29128C5E001A6DA7 /* IndexBuffer.cpp in Sources */,
 				AC6934A12913D80300B07779 /* VertexArray.cpp in Sources */,
 				AC82A683291BF04E0042BF7C /* Texture.cpp in Sources */,
@@ -437,6 +453,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/OpenGL_Sample/Dependencies/GLFW/include",
 					/usr/local/include,
+					"$(PROJECT_DIR)/OpenGL_Sample/tests",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -457,6 +474,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/OpenGL_Sample/Dependencies/GLFW/include",
 					/usr/local/include,
+					"$(PROJECT_DIR)/OpenGL_Sample/tests",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
