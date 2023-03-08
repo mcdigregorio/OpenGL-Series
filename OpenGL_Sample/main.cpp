@@ -26,6 +26,10 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
 int main(void)
 {
     GLFWwindow* window;
@@ -123,10 +127,6 @@ int main(void)
     
     glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0));
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));
-    
-    //Model, view, projection matrix
-    glm::mat4 mvp = proj * view * model;
     
     glm::vec4 vp(100.0f, 100.0f, 0.0f, 1.0f);
     //For instructional purposes can add break point and see shader math here on CPU to see what we get
@@ -137,9 +137,6 @@ int main(void)
     Shader shader("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/shaders/basic.shader");
     shader.Bind();
     shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
-    //Need to set MVP uniform
-    //Setting once is enough, but can set every frame if we want to
-    shader.SetUniformMat4f("u_MVP", mvp);
     
     Texture texture("/Users/michaeldigregorio/devspace/OpenGL_Sample/OpenGL_Sample/res/textures/bananas.png");
     texture.Bind();
@@ -155,6 +152,13 @@ int main(void)
     
     Renderer renderer;
     
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init();
+    ImGui::StyleColorsDark();
+    
+    glm::vec3 translation(200, 200, 0);
+    
     //Red channel
     float r = 0.0f;
     float increment = 0.05f;
@@ -165,8 +169,23 @@ int main(void)
         //Render here
         renderer.Clear();
         
+        //Nothing to do with GLFW new frame
+        //Can put pretty much anywhere, just as long as it's
+        //Before other ImGui code that isn't for init
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        
+        //Recalculating model matrix and mvp every frame
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+        //Model, view, projection matrix
+        glm::mat4 mvp = proj * view * model;
+        
         shader.Bind();
         shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+        //Need to set MVP uniform
+        //Setting once is enough, but can set every frame if we want to
+        shader.SetUniformMat4f("u_MVP", mvp);
     
         renderer.Draw(va, ib, shader);
         
@@ -178,12 +197,28 @@ int main(void)
         
         r += increment;
         
+        //ImGui window
+        {
+            //Single passing the memory address of translation, y and z will get passed along since memory layout is the same
+            //Float3 arg 2 is float array
+            //In theory could get float array out of GLM, but for now just passing memory address
+            ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        }
+        
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        
         /* Swap front and back buffers */
         GLCall(glfwSwapBuffers(window));
 
         /* Poll for and process events */
         GLCall(glfwPollEvents());
     }
+    
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     
     GLCall(glfwTerminate());
     return 0;
