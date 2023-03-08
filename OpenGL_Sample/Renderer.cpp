@@ -28,8 +28,11 @@ bool GLLogCall(const char* function, const char* file, int line)
 
 void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const
 {
+    //Binds a program for our GPU to actually use to render
     shader.Bind();
+    //Array that contains all of the actual data
     va.Bind();
+    //Contains the indices into the vertex buffer to choose which indices we want to render and how to assemble them together
     ib.Bind();
     //GL_UNSIGNED_INT is type of data in index buffer
     //Can use nullptr since we bind ibo above
