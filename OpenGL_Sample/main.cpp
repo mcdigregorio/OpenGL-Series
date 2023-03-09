@@ -77,17 +77,21 @@ int main(void)
     ImGui_ImplOpenGL3_Init();
     ImGui::StyleColorsDark();
     
-    test::TestClearColor test;
+    test::Test* currentTest = nullptr;
+    test::TestMenu* menu = new test::TestMenu(currentTest);
+    //Want to start off with menu
+    //Could add CLI arg here to boot up with specific test here
+    currentTest = menu;
+    
+    menu->RegisterTest<test::TestClearColor>("Clear Color");
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+        //Reset window clear color to black when exiting color test
+        GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
         //Render here
         renderer.Clear();
-        
-        //0.0 for now since now setup
-        test.OnUpdate(0.0f);
-        test.OnRender();
         
         //Nothing to do with GLFW new frame
         //Can put pretty much anywhere, just as long as it's
@@ -96,7 +100,19 @@ int main(void)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
-        test.OnImGuiRender();
+        if(currentTest)
+        {
+            currentTest->OnUpdate(0.0f);
+            currentTest->OnRender();
+            ImGui::Begin("Test");
+            if(currentTest != menu && ImGui::Button("<-"))
+            {
+                delete currentTest;
+                currentTest = menu;
+            }
+            currentTest->OnImGuiRender();
+            ImGui::End();
+        }
         
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -107,6 +123,12 @@ int main(void)
         /* Poll for and process events */
         GLCall(glfwPollEvents());
     }
+    
+    //If currentTest is menu, deleting things twice
+    //Add if statement below
+    delete currentTest;
+    if(currentTest != menu)
+        delete menu;
     
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
