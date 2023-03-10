@@ -22,6 +22,7 @@
 		AC5938A329B7CC0100F8F76B /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC59389C29B7CC0100F8F76B /* imgui_draw.cpp */; };
 		AC5938AB29B9287800F8F76B /* TestClearColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC5938A929B9287800F8F76B /* TestClearColor.cpp */; };
 		AC5938AD29BA03B900F8F76B /* Test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC5938AC29BA03B900F8F76B /* Test.cpp */; };
+		AC5938B029BB501500F8F76B /* TestTexture2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC5938AE29BB501500F8F76B /* TestTexture2D.cpp */; };
 		AC6934A12913D80300B07779 /* VertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC69349F2913D80300B07779 /* VertexArray.cpp */; };
 		AC82A680291BCBF30042BF7C /* stb_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC82A67F291BCBF30042BF7C /* stb_image.cpp */; };
 		AC82A683291BF04E0042BF7C /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC82A681291BF04E0042BF7C /* Texture.cpp */; };
@@ -75,6 +76,8 @@
 		AC5938A929B9287800F8F76B /* TestClearColor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TestClearColor.cpp; sourceTree = "<group>"; };
 		AC5938AA29B9287800F8F76B /* TestClearColor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TestClearColor.hpp; sourceTree = "<group>"; };
 		AC5938AC29BA03B900F8F76B /* Test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Test.cpp; sourceTree = "<group>"; };
+		AC5938AE29BB501500F8F76B /* TestTexture2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestTexture2D.cpp; sourceTree = "<group>"; };
+		AC5938AF29BB501500F8F76B /* TestTexture2D.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TestTexture2D.hpp; sourceTree = "<group>"; };
 		AC5A69FC29B2178A00D42773 /* glm */ = {isa = PBXFileReference; lastKnownFileType = folder; path = glm; sourceTree = "<group>"; };
 		AC69349F2913D80300B07779 /* VertexArray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VertexArray.cpp; sourceTree = "<group>"; };
 		AC6934A02913D80300B07779 /* VertexArray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VertexArray.hpp; sourceTree = "<group>"; };
@@ -217,6 +220,8 @@
 		AC5938A529B9263E00F8F76B /* tests */ = {
 			isa = PBXGroup;
 			children = (
+				AC5938AE29BB501500F8F76B /* TestTexture2D.cpp */,
+				AC5938AF29BB501500F8F76B /* TestTexture2D.hpp */,
 				AC5938A729B9265B00F8F76B /* Test.hpp */,
 				AC5938A929B9287800F8F76B /* TestClearColor.cpp */,
 				AC5938AA29B9287800F8F76B /* TestClearColor.hpp */,
@@ -326,6 +331,7 @@
 				ACE37F6D2915253D006B1DBC /* Shader.cpp in Sources */,
 				AC9FE8E729128946001A6DA7 /* VertexBuffer.cpp in Sources */,
 				AC5938A229B7CC0100F8F76B /* imgui_widgets.cpp in Sources */,
+				AC5938B029BB501500F8F76B /* TestTexture2D.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
