@@ -13,13 +13,15 @@
 
 #include "glm/glm.hpp"
 
+#include "Renderer.h"
+
 struct ShaderProgramSouce
 {
     std::string VertexSource;
     std::string FragmentSource;
 };
 
-
+//CPU representation of an actual compiled and created shader object on our GPU
 class Shader
 {
 private:
@@ -27,7 +29,8 @@ private:
     std::string m_Filepath;
     unsigned int m_RendererID;
     //caching for uniforms
-    std::unordered_map<std::string, int> m_UniformLocationCache;
+    //Mutable so that it can be modified in const GetUniformLocation function
+    mutable std::unordered_map<std::string, GLint> m_UniformLocationCache;
 public:
     Shader(const std::string& filepath);
     ~Shader();
@@ -48,7 +51,7 @@ private:
     ShaderProgramSouce ParseShader(const std::string& filepath);
     unsigned int CompileShader(unsigned int type, const std::string& source);
     unsigned int CreateShader(const std::string&vertexShader, const std::string& fragmentShader);
-    int GetUniformLocation(const std::string& name);
+    GLint GetUniformLocation(const std::string& name) const;
 };
 
 #endif /* Shader_hpp */

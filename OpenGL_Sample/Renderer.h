@@ -14,6 +14,9 @@
 #ifndef Renderer_h
 #define Renderer_h
 
+//Need forward declaration after moving Renderer.hpp into Shader.hpp
+class Shader;
+
 //If false will call function to insert breakpoint at that moment in code
 //Intrinsic to compiler (will be different for each compiler)
 //For example, for MSVC you call __debugbreak() isntead of __builtin_trap()
